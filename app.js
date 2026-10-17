@@ -25,6 +25,28 @@ function updateClock() {
 updateClock(); setInterval(updateClock, 1000);
 
 function notify(text) { toast.textContent = text; toast.classList.add('show'); clearTimeout(notify.timer); notify.timer = setTimeout(() => toast.classList.remove('show'), 2800); }
+function editDistance(left, right) {
+  const row = Array.from({ length: right.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= left.length; i += 1) {
+    let diagonal = row[0]; row[0] = i;
+    for (let j = 1; j <= right.length; j += 1) {
+      const above = row[j];
+      row[j] = Math.min(row[j] + 1, row[j - 1] + 1, diagonal + (left[i - 1] === right[j - 1] ? 0 : 1));
+      diagonal = above;
+    }
+  }
+  return row[right.length];
+}
+function findWakeWord(transcript) {
+  const words = transcript.toLowerCase().match(/[a-z]+/g) || [];
+  for (let i = 0; i < Math.min(words.length, 4); i += 1) {
+    const one = words[i].replace(/[^a-z]/g, '');
+    const two = i + 1 < words.length ? one + words[i + 1].replace(/[^a-z]/g, '') : '';
+    const candidate = [one, two].find(word => word && editDistance(word, 'jarvis') <= 2);
+    if (candidate) return { wordIndex: i, wordCount: candidate === two ? 2 : 1 };
+  }
+  return null;
+}
 function setVoiceState(state) {
   document.body.dataset.voiceState = state;
   if (state === 'listening') { voiceStatus.textContent = 'I’m listening. Say “Jarvis” to get my attention.'; wakeLabel.textContent = 'Listening for “Jarvis”'; }
@@ -53,7 +75,9 @@ function localAnswer(prompt) {
 function startRecognition() {
   if (!voiceEnabled || !recognition || recognizing || speechSynthesis.speaking) return;
   clearTimeout(restartTimer);
-  try { recognition.start(); } catch { /* The browser may still be finishing a previous session. */ }
+  try { recognition.start(); } catch (error) {
+    if (error.name !== 'InvalidStateError') { voiceStatus.textContent = 'Could not start listening. Check microphone permission and try again.'; }
+  }
 }
 function speak(text) {
   if (!('speechSynthesis' in window)) return;
@@ -107,23 +131,24 @@ function activateVoice() {
     for (let i = event.resultIndex; i < event.results.length; i += 1) {
       const result = event.results[i];
       if (mode === 'wake') {
-        // Check alternate speech hypotheses too: the service can hear "Jarvice" or "Jarvus".
-        let match;
+        let heardText = '';
+        let wake = null;
         for (let alternative = 0; alternative < result.length; alternative += 1) {
-          const heard = result[alternative].transcript.trim();
-          match = heard.match(/\bjarv(?:is|ice|us|iss|es|as)\b[,.!\s]*(.*)/i);
-          if (match) break;
+          const candidate = result[alternative].transcript.trim();
+          if (!heardText) heardText = candidate;
+          wake = findWakeWord(candidate);
+          if (wake) { heardText = candidate; break; }
         }
+        if (heardText) voiceStatus.textContent = `I heard: “${heardText}” — say “Jarvis” to wake me.`;
         // Wait for the utterance to finish so "Jarvis, what's the time?" is not cut off.
-        if (!match || !result.isFinal) continue;
-        const rest = match[1].trim();
+        if (!wake || !result.isFinal) continue;
+        const rest = (heardText.match(/[a-z]+/gi) || []).slice(wake.wordIndex + wake.wordCount).join(' ').trim();
         if (rest) { mode = 'command'; answerPrompt(rest); }
         else { mode = 'command'; setVoiceState('command'); speak('Yes?'); }
         break;
       }
       if (mode === 'command' && result.isFinal) {
-        const heard = result[0].transcript.trim();
-        const command = heard.replace(/^\s*jarv(?:is|ice|us)[,.!\s]*/i, '').trim();
+        const command = result[0].transcript.trim();
         if (command) answerPrompt(command);
         else { mode = 'wake'; setVoiceState('listening'); }
         break;
