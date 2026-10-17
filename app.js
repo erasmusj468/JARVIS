@@ -69,10 +69,16 @@ function speak(text) {
   utterance.onerror = utterance.onend;
   window.speechSynthesis.speak(utterance);
 }
-function answerPrompt(prompt) {
+async function answerPrompt(prompt) {
   const text = (prompt || '').trim(); if (!text) return;
   welcome.hidden = true; addMessage(text, 'user'); input.value = ''; input.style.height = 'auto'; sendBtn.disabled = true;
-  const reply = localAnswer(text); const bubble = addMessage('', 'assistant');
+  const bubble = addMessage('', 'assistant');
+  let reply;
+  try {
+    const response = await fetch('/api/command', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: text }) });
+    if (!response.ok) throw new Error('Python server unavailable');
+    ({ reply } = await response.json());
+  } catch { reply = localAnswer(text); }
   let i = 0; const timer = setInterval(() => {
     bubble.textContent = reply.slice(0, i += 3);
     if (i >= reply.length) { clearInterval(timer); sendBtn.disabled = false; if (voiceEnabled) speak(reply); }
@@ -86,28 +92,38 @@ function activateVoice() {
     window.speechSynthesis.cancel(); setVoiceState('idle'); voiceNote.textContent = 'Microphone is off.'; return;
   }
   recognition = new SpeechRecognition();
-  recognition.lang = navigator.language || 'en-US'; recognition.continuous = true; recognition.interimResults = true; recognition.maxAlternatives = 1;
+  recognition.lang = navigator.language || 'en-US'; recognition.continuous = true; recognition.interimResults = true; recognition.maxAlternatives = 4;
   recognition.onstart = () => { recognizing = true; setVoiceState(mode === 'command' ? 'command' : 'listening'); };
   recognition.onend = () => { recognizing = false; if (voiceEnabled && !window.speechSynthesis.speaking) restartTimer = setTimeout(startRecognition, 350); };
   recognition.onerror = event => {
     recognizing = false;
-    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+    if (event.error === 'not-allowed' || event.error === 'service-not-allowed' || event.error === 'audio-capture' || event.error === 'network') {
       voiceEnabled = false; setVoiceState('idle'); voiceNote.textContent = 'Microphone permission was blocked. Allow microphone access in your browser, then try again.';
+      if (event.error === 'network') voiceNote.textContent = 'The browser speech service is unavailable. Check your internet connection or try Chrome/Edge.';
+      if (event.error === 'audio-capture') voiceNote.textContent = 'No microphone was found. Connect or enable a microphone, then try again.';
     } else if (event.error !== 'no-speech' && event.error !== 'aborted') notify(`Voice recognition: ${event.error}.`);
   };
   recognition.onresult = event => {
     for (let i = event.resultIndex; i < event.results.length; i += 1) {
-      const result = event.results[i]; const heard = result[0].transcript.trim();
+      const result = event.results[i];
       if (mode === 'wake') {
-        const match = heard.match(/\bjarvis\b[,.!\s]*(.*)/i);
-        if (!match) continue;
+        // Check alternate speech hypotheses too: the service can hear "Jarvice" or "Jarvus".
+        let match;
+        for (let alternative = 0; alternative < result.length; alternative += 1) {
+          const heard = result[alternative].transcript.trim();
+          match = heard.match(/\bjarv(?:is|ice|us|iss|es|as)\b[,.!\s]*(.*)/i);
+          if (match) break;
+        }
+        // Wait for the utterance to finish so "Jarvis, what's the time?" is not cut off.
+        if (!match || !result.isFinal) continue;
         const rest = match[1].trim();
         if (rest) { mode = 'command'; answerPrompt(rest); }
         else { mode = 'command'; setVoiceState('command'); speak('Yes?'); }
         break;
       }
       if (mode === 'command' && result.isFinal) {
-        const command = heard.replace(/^\s*jarvis[,.!\s]*/i, '').trim();
+        const heard = result[0].transcript.trim();
+        const command = heard.replace(/^\s*jarv(?:is|ice|us)[,.!\s]*/i, '').trim();
         if (command) answerPrompt(command);
         else { mode = 'wake'; setVoiceState('listening'); }
         break;

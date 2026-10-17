@@ -4,9 +4,9 @@ A responsive, voice-first assistant interface with a live clock, wake-word activ
 
 ## Run it
 
-Open `index.html` in a modern browser, or serve this folder with any static file server. Click **Enable voice activation** once to grant microphone permission, then leave the tab open and say **“Jarvis”** followed by your request. You can also say just “Jarvis,” wait for the spoken “Yes?”, then give your request. Click the button again to stop listening.
+Run `python run.py` from this folder. It starts the Python server at `http://127.0.0.1:8000` and opens the page. Click **Enable voice activation** once to grant microphone permission, then leave the tab open and say **“Jarvis”** followed by your request. You can also say just “Jarvis,” wait for the spoken “Yes?”, then give your request. It also accepts common recognition spellings like “Jarvice” and “Jarvus”. Click the button again to stop listening.
 
-Hands-free wake-word listening requires browser support for the Web Speech API (commonly available in Chrome and Edge) and a secure context (`https://` or `localhost`). The browser requires a user gesture before it can request microphone access. Voice playback uses the browser's speech synthesis. Type in the message field when voice recognition is unavailable.
+Hands-free wake-word listening requires browser support for the Web Speech API (commonly available in Chrome and Edge) and a secure context (`https://` or `localhost`). The browser requires a user gesture before it can request microphone access. Voice playback uses the browser's speech synthesis. The Python server handles local demo commands; type in the message field when voice recognition is unavailable. The browser may use its speech service for recognition, depending on browser settings.
 
 ## Current behavior
 
@@ -23,5 +23,6 @@ To connect an AI model:
 
 - `index.html` — page structure
 - `styles.css` — responsive dark interface
-- `app.js` — chat demo, clock, wake-word listener, and spoken replies
+- `app.js` — chat interface, clock, wake-word listener, and spoken replies
 - `voice.css` — microphone activation and voice state animations
+- `run.py` — Python web server and local command endpoint
