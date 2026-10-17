@@ -1,10 +1,12 @@
 # JARVIS — Personal Assistant
 
-A responsive, voice-ready assistant interface with a live clock, quick commands, speech input, and spoken replies. It runs as a static site and needs no build step.
+A responsive, voice-first assistant interface with a live clock, wake-word activation, speech input, and spoken replies. It runs as a static site and needs no build step.
 
 ## Run it
 
-Open `index.html` in a modern browser, or serve this folder with any static file server. Microphone access requires a secure context (`https://` or `localhost`) and browser support for the Web Speech API. Voice playback uses the browser's speech synthesis.
+Open `index.html` in a modern browser, or serve this folder with any static file server. Click **Enable voice activation** once to grant microphone permission, then leave the tab open and say **“Jarvis”** followed by your request. You can also say just “Jarvis,” wait for the spoken “Yes?”, then give your request. Click the button again to stop listening.
+
+Hands-free wake-word listening requires browser support for the Web Speech API (commonly available in Chrome and Edge) and a secure context (`https://` or `localhost`). The browser requires a user gesture before it can request microphone access. Voice playback uses the browser's speech synthesis. Type in the message field when voice recognition is unavailable.
 
 ## Current behavior
 
@@ -21,4 +23,5 @@ To connect an AI model:
 
 - `index.html` — page structure
 - `styles.css` — responsive dark interface
-- `app.js` — chat demo, clock, speech input, and speech output
+- `app.js` — chat demo, clock, wake-word listener, and spoken replies
+- `voice.css` — microphone activation and voice state animations
