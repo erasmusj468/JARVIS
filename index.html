@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#080d13" />
+  <meta name="description" content="JARVIS — a voice-ready personal assistant interface." />
+  <title>JARVIS — Personal Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#" aria-label="JARVIS home"><span class="brand-mark">J</span><span>JARVIS</span></a>
+      <div class="side-label">WORKSPACE</div>
+      <button class="nav-item active"><span class="nav-icon">◉</span> Assistant <span class="nav-dot"></span></button>
+      <button class="nav-item" data-prompt="What can you help me with?"><span class="nav-icon">⌘</span> Capabilities</button>
+      <div class="side-bottom"><div class="status-line"><span class="status-pulse"></span><span>ALL SYSTEMS NORMAL</span></div><div class="profile"><div class="avatar">Y</div><div><b>Your workspace</b><small>Personal edition</small></div><span class="more">···</span></div></div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar"><div class="breadcrumb">Workspace <span>/</span> <b>Assistant</b></div><div class="top-right"><div class="top-status"><span class="status-pulse"></span> ONLINE</div><button class="icon-button" id="clearBtn" title="Clear conversation" aria-label="Clear conversation">↻</button></div></header>
+      <section class="conversation" id="conversation">
+        <div class="welcome" id="welcome">
+          <div class="eyebrow"><span class="eyebrow-line"></span> PERSONAL ASSISTANT <span class="eyebrow-line"></span></div>
+          <div class="reactor-wrap"><div class="reactor-halo"></div><div class="reactor"><div class="reactor-inner"><span>J</span></div></div><div class="reactor-orbit orbit-one"></div><div class="reactor-orbit orbit-two"></div></div>
+          <h1>At your service.</h1>
+          <p class="welcome-copy">Good to have you here. What can I help you with?</p>
+          <div class="suggestions">
+            <button class="suggestion" data-prompt="What time is it?"><span class="suggestion-icon">◷</span><span><b>Check the time</b><small>Get the local time</small></span><span class="suggestion-arrow">↗</span></button>
+            <button class="suggestion" data-prompt="Give me a quick briefing"><span class="suggestion-icon">✳</span><span><b>Give me a briefing</b><small>A quick start to your day</small></span><span class="suggestion-arrow">↗</span></button>
+            <button class="suggestion" data-prompt="What can you do?"><span class="suggestion-icon">⌘</span><span><b>Explore capabilities</b><small>See what I can help with</small></span><span class="suggestion-arrow">↗</span></button>
+          </div>
+        </div>
+        <div class="messages" id="messages" aria-live="polite"></div>
+      </section>
+
+      <footer class="composer-area"><form class="composer" id="chatForm"><textarea id="prompt" rows="1" placeholder="Ask JARVIS anything..." aria-label="Message JARVIS"></textarea><div class="composer-tools"><div class="input-hint"><span>↵</span> to send <span class="hint-divider">·</span> <span>⇧ ↵</span> new line</div><div class="actions"><button type="button" class="mic-button" id="micBtn" title="Use voice input" aria-label="Use voice input">⌁</button><button class="send-button" id="sendBtn" type="submit" aria-label="Send message">↑</button></div></div></form><div class="disclaimer">JARVIS is in local demo mode. Connect an AI service to unlock open-ended answers.</div></footer>
+    </main>
+    <aside class="right-rail"><div class="rail-heading"><span>AT A GLANCE</span><span class="live-label"><i></i> LIVE</span></div><section class="time-card"><div class="card-kicker">LOCAL TIME</div><div class="clock" id="clock">--:--<span>--</span></div><div class="date" id="date">Loading date...</div><div class="clock-rule"></div><div class="timezone"><span class="pin">⌖</span><span id="timezone">Local timezone</span><span class="good">●</span></div></section><section class="rail-card"><div class="card-kicker">QUICK COMMANDS</div><button class="quick-command" data-prompt="What time is it?"><span>◷</span> What time is it? <i>↗</i></button><button class="quick-command" data-prompt="Give me a quick briefing"><span>✳</span> Give me a briefing <i>↗</i></button><button class="quick-command" data-prompt="What can you do?"><span>⌘</span> What can you do? <i>↗</i></button><button class="quick-command" data-prompt="Tell me something interesting"><span>✧</span> Surprise me <i>↗</i></button></section><section class="connection-card"><div class="connection-icon">⌘</div><div><b>Want the full experience?</b><p>Connect an AI provider for open-ended conversations.</p><button id="setupBtn">VIEW SETUP GUIDE <span>↗</span></button></div></section><div class="rail-footer"><span>JARVIS PERSONAL</span><span>v1.0.0</span></div></aside>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
