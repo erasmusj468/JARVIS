@@ -1,28 +1,36 @@
-# JARVIS — Personal Assistant
+# JARVIS Desktop Assistant
 
-A responsive, voice-first assistant interface with a live clock, wake-word activation, speech input, and spoken replies. It runs as a static site and needs no build step.
+JARVIS is a small Windows desktop app written in Python. It listens for the wake word on your microphone using offline speech recognition, speaks replies, opens selected desktop apps, and opens websites or web searches in new browser tabs.
 
-## Run it
+## Set it up on Windows
 
-Run `py run.py` from this folder. It starts the Python server at `http://127.0.0.1:8000` and opens the page. Click **Enable voice activation** once to grant microphone permission, then leave the tab open and say **“Jarvis”** followed by your request. You can also say just “Jarvis,” wait for the spoken “Yes?”, then give your request. Wake matching tolerates common recognition misspellings and split words. While it listens, the status line shows the words the browser recognized, which helps diagnose microphone or speech recognition issues. Click the button again to stop listening.
+Install Python 3.10 or 3.11 from python.org if it is not already installed. During setup, enable **Add Python to PATH** and include **tcl/tk and IDLE** so the desktop window can run.
 
-Hands-free wake-word listening requires browser support for the Web Speech API (commonly available in Chrome and Edge) and a secure context (`https://` or `localhost`). The browser requires a user gesture before it can request microphone access. Voice playback uses the browser's speech synthesis. The Python server handles local demo commands; type in the message field when voice recognition is unavailable. The browser may use its speech service for recognition, depending on browser settings.
+Open a terminal in this project folder and run this one-time setup:
 
-## Current behavior
+```powershell
+py -m pip install -r requirements.txt
+py setup_voice.py
+py run.py
+```
 
-This starter runs in local demo mode. It handles time, date, a short briefing, and a capabilities prompt locally. Open-ended AI answers need a model provider and a small server-side API route; the browser should never contain a provider secret.
+The voice model download is about 40 MB. Once setup is complete, double-click `Start JARVIS.bat` any time to open the app. Recognition happens locally and does not use a browser speech service. Keep the app open, click **Enable voice activation**, and allow microphone access if Windows asks. Say “Jarvis” and then your command, for example “Jarvis, open calculator.” The small English model can make occasional transcription mistakes; the wake matcher accepts close and split spellings.
 
-To connect an AI model:
+## Voice commands
 
-1. Choose a provider and create a private API key.
-2. Add a server endpoint such as `POST /api/chat` that reads the key from a server environment variable and forwards the conversation to the provider.
-3. Replace `localAnswer()` in `app.js` with a `fetch('/api/chat', ...)` call, and render the returned text. Keep the API key on the server.
-4. Update the assistant's loading and error states to match the endpoint response.
+- “Jarvis, open calculator/notepad/paint/file explorer/task manager/settings”
+- “Jarvis, open Chrome/Edge/Firefox” or “Jarvis, open browser”
+- “Jarvis, open youtube.com” or “Jarvis, open a new browser tab to github.com”
+- “Jarvis, search the web for [something]”
+- “Jarvis, what time is it?” or “Jarvis, help”
+
+The app only starts a fixed set of local applications. Website and search requests open in your default browser. Typing commands in the app works even when voice activation is off.
 
 ## Project files
 
-- `index.html` — page structure
-- `styles.css` — responsive dark interface
-- `app.js` — chat interface, clock, wake-word listener, and spoken replies
-- `voice.css` — microphone activation and voice state animations
-- `run.py` — Python web server and local command endpoint
+- `jarvis.py` — native Tkinter interface, local microphone listener, speech output, and command handling
+- `run.py` — desktop app launcher
+- `setup_voice.py` — downloads and unpacks the English speech model
+- `requirements.txt` — Python packages for offline speech recognition and voice output
+
+The voice model is stored under `models/` and excluded from Git. The official compact Vosk English model is approximately 40 MB and licensed Apache 2.0. [Vosk model list](https://alphacephei.com/vosk/models). The microphone capture follows Vosk's Python `sounddevice` example: [Vosk microphone example](https://github.com/alphacep/vosk-api/blob/master/python/example/test_microphone.py).
